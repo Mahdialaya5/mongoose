@@ -8,7 +8,7 @@ require("dotenv").config({path:"./config/.env"});
 
 const create=async()=>{
   try {
-    const user1=  await User.insertMany([{name:"Ahmed",age:50},{name:"aymen",age:12},{name:"mohamed",age:15}])
+    const user1=  await User.insertMany([{name:"John",age:50, favoritesfood:["burritos"]},{name:"Mary",age:12,favoritesfood:["burritos","pizza"]},{name:"Mary",age:15,favoritesfood:[""]}])
     console.log(user1) 
   
     console.log("user create success");
@@ -16,67 +16,104 @@ const create=async()=>{
     console.log(error)
 }}
 
-app.use(express.json())
 
-//method get
-app.get('/', async(req, res) => {
- try {
-      const user2=  await User.find()
-      console.log(user2) 
-      res.send({msg:user2})
-      
-  } catch (error) {
-      console.log(error)
-  }
-})
 
-//method post
-app.post('/add', async(req, res) => {
+//method find
+const find=async()=>{
   try {
-      const newUser=  new  User({
-        name:req.body.name,
-        age:req.body.age
-      })
-    await newUser.save()
-      
-      res.send({msg:"add success"} )
-    console.log("add succes");
+    const user1=  await User.find()
+    console.log(user1) 
   
-  } catch (error) {
-      console.log(error)
-  } 
-    
-})
+    console.log("user find succes");
+} catch (error) {
+    console.log(error)
+}}
 
-//method put
-app.put('/update/:id', async(req, res) => {
 
-    try {
-      const user2=  await User.updateOne({_id:req.params.id}, { age:52 })
-        res.send({msg:user2} )
-        console.log("update succes");
-  } catch (error) {
-      console.log(error)
-      res.status(400).send({msg:" aleardy update "})
-  }  
-  
-})
-
-//method delete 
-app.delete('/:id', async(req, res) => {
+//method findOne
+const findOne=async()=>{
   try {
-      const user2=  await User.deleteOne({_id:req.params.id})
-       
-         res.send({msg:user2})
-      console.log("delete succes");
+    const user1=  await User.findOne({name:"John"})
+    console.log(user1) 
+  
+    console.log("user find succes");
+} catch (error) {
+    console.log(error)
+}}
+
+//method findOne
+const findbyid=async(id)=>{
+  try {
+    const user1=  await User.findById(id)
+    console.log(user1) 
+  
+    console.log("user findOne succes");
+} catch (error) {
+    console.log(error)
+}}
+
+
+//method update
+const edit=async(id)=> {
+  try {
+      const user2=  await User.findById(id)
+          user2.favoritesfood.push(pizza)
+          user2.save()
+      console.log("update succes");
   } catch (error) {
       console.log(error)
+  }}
+//method find andupdate
+const update=async(id)=> {
+  try {
+      const user2=  await User.findByIdAndUpdate({_id:id},{age:54})
+          user2.save()
+      console.log("update succes");
+  } catch (error) {
+      console.log(error)
+  }}
+//method find anddelete
+const findanddelete=async(id)=> {
+  try {
+      const user2=  await User.findByIdAndRemove(id,{age:54})
+          
+      console.log("update succes");
+  } catch (error) {
+      console.log(error)
+  }}
+//method delete many
+const deletemany=async(id)=> {
+  try {
+      const user2=  await User.deleteMany({name:"Mary"})
+          
+      console.log("update succes");
+  } catch (error) {
+      console.log(error)
+  }}
+//Chain Search Query Helpers
+var queryChain = async () => {
+  try {
+    const user2 = await User.find({ favoriteFoods: 'burritos' })
+      .sort({ name: 1 })
+      .limit(2)
+      .select('-age')
+      .exec((err, user2) => {
+        if (err) return handleError(err);
+        console.log(user2);
+      });
+  } catch (error) {
+    console.log(error);
   }
- 
-})
-
+};
 connectDb()
 create()
-
+find()
+findOne()
+findbyid()
+edit()
+update()
+findanddelete()
+deletemany()
+queryChain() 
 app.listen(port, () => 
 console.log(`app listening on port ${port}!`))
