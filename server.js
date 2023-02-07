@@ -1,135 +1,82 @@
 const express = require('express')
 const app = express()
 const port = 5000
-const connectDb = require('./connect')
-const User=require("./model/Model")
-require("dotenv").config();
-//Create a person
-const createUser=async()=>{
-  try {
-      const user1=new User({name:"john",age:12,favoriteFoods:["hamburger"]})
-      console.log(user1) 
-      await user1.save()
-      console.log("user added success");
-  } catch (error) {
-      console.log(error)
-  }}
+const connectDb = require('./config/connect')
+const User=require("./models/User")
+require("dotenv").config({path:"./config/.env"});
 
-//create many 
-  const createMany=async()=>{
+
+const create=async()=>{
   try {
-    const user1=  await User.insertMany([{name:"John",age:12,favoriteFoods:["burritos"]},{name:"Ahmed",age:12,favoriteFoods:["burritos"]},{name:"John",age:12,favoriteFoods:["hamburger"]},{name:"ali",age:15,favoriteFoods:[,"burritos"]},{name:"Mary",age:15,favoriteFoods:["pizza","burritos"]}])
+    const user1=  await User.insertMany([{name:"Ahmed",age:50},{name:"aymen",age:12},{name:"mohamed",age:15}])
     console.log(user1) 
   
-    console.log("user added success");
+    console.log("user create success");
 } catch (error) {
     console.log(error)
 }}
 
-//find user
-const findUser=async()=>{
-  try {
-    const user2=  await User.find()
-    console.log(user2) 
-  
-    console.log("find succes");
-} catch (error) {
-    console.log(error)
-}}
+app.use(express.json())
 
-//find one user
-const findOneUser=async()=>{
-  try {
-    const user2=  await User.findOne({name:"John"})
-    console.log(user2) 
-  
-    console.log("find succes");
-} catch (error) {
-    console.log(error)
-}}
-
-//find by id
-const findbyid=async()=>{
-  try {
-    const user2=  await User.findById({_id:'63db9539c5a3102d767ddea3'})
-    console.log(user2) 
-  
-    console.log("find succes");
-} catch (error) {
-    console.log(error)
-}}
-
-//find and edit
-const findEdit=async()=>{
-  try {
-    const user2=  await User.findOne({_id:'63db9539c5a3102d767ddea3'})
-    console.log(user2) 
-     user2.favoriteFoods.push("hamburger")
-  await user2.save()
-    console.log("edit succes");
-} catch (error) {
-    console.log(error)
-}}
-
-//findOneAndUpdate
-const findOneAndUpdate=async()=>{
-  try {
-    const user2=  await User.findByIdAndUpdate('63db9539c5a3102d767ddea3', { name: 'jason bourne' })
-    console.log(user2) 
-     await user2.save()
-    console.log("update succes");
-} catch (error) {
-    console.log(error)
-}}
-
-//findByIdAndRemove
-const findByIdAndRemove=async()=>{
-  try {
-    const user2=  await User.findByIdAndRemove('63db9539c5a3102d767ddea3')
-    console.log(user2) 
-     
-    console.log("remove succes");
-} catch (error) {
-    console.log(error)
-}}
-
-//Delete Many
-const DeleteMany=async()=>{
-  try {
-    const user2=  await User.deleteMany({name:"John"}) 
+//method get
+app.get('/', async(req, res) => {
+ try {
+      const user2=  await User.find()
       console.log(user2) 
-      console.log("delete many succes");
-} catch (error) {
-    console.log(error)
-}}
+      res.send({msg:user2})
+      
+  } catch (error) {
+      console.log(error)
+  }
+})
 
-//Find people who like burritos
-const  findBurritos=async()=>{
+//method post
+app.post('/add', async(req, res) => {
   try {
-    const user2=  await User.find({favoriteFoods:"burritos"})
-    .sort({ name: 1}).limit(2).select('-age')
-    
-    .exec((err, user2) => {
-      if (err) 
-      return handleError(err);
-      console.log(user2);
-    });
-     console.log("find people who like burritos succes")
+      const newUser=  new  User({
+        name:req.body.name,
+        age:req.body.age
+      })
+    await newUser.save()
+      
+      res.send({msg:"add success"} )
+    console.log("add succes");
+  
+  } catch (error) {
+      console.log(error)
   } 
-     catch (error) {
-    console.log(error)
-}}
+    
+})
+
+//method put
+app.put('/update/:id', async(req, res) => {
+
+    try {
+      const user2=  await User.updateOne({_id:req.params.id}, { age:52 })
+        res.send({msg:user2} )
+        console.log("update succes");
+  } catch (error) {
+      console.log(error)
+      res.status(400).send({msg:" aleardy update "})
+  }  
+  
+})
+
+//method delete 
+app.delete('/:id', async(req, res) => {
+  try {
+      const user2=  await User.deleteOne({_id:req.params.id})
+       
+         res.send({msg:user2})
+      console.log("delete succes");
+  } catch (error) {
+      console.log(error)
+  }
+ 
+})
 
 connectDb()
-findBurritos()
-//DeleteMany()
-//findByIdAndRemove()
-//findOneAndUpdate()
-//findEdit()
-//findbyid()
-//findOneUser()
-//findUser()
-//createUser()
-//createMany()
+create()
+
 app.listen(port, () => 
 console.log(`app listening on port ${port}!`))
